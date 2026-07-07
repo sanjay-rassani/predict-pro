@@ -39,5 +39,25 @@ flutter build apk             # Android release build
 ## Section status
 
 - **Section 0:** Flutter project scaffold
-- **Section 5:** Free-tier screens (Home, Live Scores, predictions, News)
-- **Section 6:** Premium screens, lock screen, FCM
+- **Section 5:** Free-tier screens — dark theme, REST + WebSocket, demo login, Home, Live Scores, 1X2, Under/Over, News, My Predictions
+- **Section 6:** Premium screens — Smart Signals hub (Surprise, Game Back, Analytics), lock screen for free users, live odds via WebSocket, push registration + in-app alerts
+- **Section 7:** Polish — loading/empty/error states, API error handling, WebSocket reconnect, smoke tests
+
+## Run against local backend
+
+```bash
+# Terminal 1 — backend on :3001
+cd backend && npm run dev
+
+# Terminal 2 — mobile (Android emulator uses 10.0.2.2 for host localhost)
+export PATH="$HOME/flutter/bin:$PATH"
+cd mobile && flutter pub get && flutter run
+```
+
+Demo accounts (seeded in backend): `free@predictpro.local`, `premium@predictpro.local`
+
+Override API host for desktop/web:
+
+```bash
+flutter run --dart-define=API_BASE_URL=http://localhost:3001 --dart-define=WS_BASE_URL=http://localhost:3001
+```

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import type { NewsArticle } from '@/lib/types';
-import { Badge, Button, Input, Modal, PageHeader, Select, Textarea } from '@/components/ui';
+import { AsyncState, Badge, Button, Input, Modal, PageHeader, Select, Textarea } from '@/components/ui';
 
 type NewsForm = {
   title: string;
@@ -24,17 +24,22 @@ const empty: NewsForm = {
 export default function NewsPage() {
   const [articles, setArticles] = useState<NewsArticle[]>([]);
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<NewsArticle | null>(null);
   const [form, setForm] = useState<NewsForm>(empty);
 
   const load = useCallback(async () => {
+    setLoading(true);
     setError('');
     try {
       const res = await api<{ data: NewsArticle[] }>('/news/admin/all');
       setArticles(res.data);
     } catch (err) {
+      setArticles([]);
       setError(err instanceof Error ? err.message : 'Failed to load news');
+    } finally {
+      setLoading(false);
     }
   }, []);
 
@@ -93,8 +98,15 @@ export default function NewsPage() {
       <div className="mb-4">
         <Button onClick={openCreate}>+ New article</Button>
       </div>
-      {error && <p className="mb-4 text-sm text-red-400">{error}</p>}
+      {error && !loading && <p className="mb-4 text-sm text-red-400">{error}</p>}
 
+      <AsyncState
+        loading={loading}
+        error={loading ? '' : error}
+        empty={articles.length === 0}
+        emptyMessage="No articles yet"
+        onRetry={load}
+      >
       <div className="overflow-x-auto rounded-xl border border-zinc-800">
         <table className="w-full text-left text-sm">
           <thead className="border-b border-zinc-800 bg-zinc-900/80 text-zinc-400">
@@ -107,14 +119,7 @@ export default function NewsPage() {
             </tr>
           </thead>
           <tbody>
-            {articles.length === 0 ? (
-              <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-zinc-500">
-                  No articles yet
-                </td>
-              </tr>
-            ) : (
-              articles.map((a) => (
+            {articles.map((a) => (
                 <tr key={a.id} className="border-b border-zinc-800/50">
                   <td className="px-4 py-3 text-white">{a.title}</td>
                   <td className="px-4 py-3 capitalize text-zinc-400">{a.category}</td>
@@ -137,11 +142,11 @@ export default function NewsPage() {
                     </div>
                   </td>
                 </tr>
-              ))
-            )}
+              ))}
           </tbody>
         </table>
       </div>
+      </AsyncState>
 
       <Modal
         open={modalOpen}

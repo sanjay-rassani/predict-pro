@@ -3,13 +3,15 @@
 import { useCallback, useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import type { Prediction } from '@/lib/types';
-import { Badge, Button, PageHeader } from '@/components/ui';
+import { AsyncState, Badge, Button, PageHeader } from '@/components/ui';
 
 export default function ApprovalPage() {
   const [signals, setSignals] = useState<Prediction[]>([]);
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
+    setLoading(true);
     setError('');
     try {
       const res = await api<{ data: Prediction[] }>(
@@ -17,7 +19,10 @@ export default function ApprovalPage() {
       );
       setSignals(res.data.filter((p) => p.is_automated_signal));
     } catch (err) {
+      setSignals([]);
       setError(err instanceof Error ? err.message : 'Failed to load queue');
+    } finally {
+      setLoading(false);
     }
   }, []);
 
@@ -26,13 +31,21 @@ export default function ApprovalPage() {
   }, [load]);
 
   const approve = async (id: number) => {
-    await api(`/predictions/${id}/approve`, { method: 'POST' });
-    load();
+    try {
+      await api(`/predictions/${id}/approve`, { method: 'POST' });
+      load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Approve failed');
+    }
   };
 
   const reject = async (id: number) => {
-    await api(`/predictions/${id}/reject`, { method: 'POST' });
-    load();
+    try {
+      await api(`/predictions/${id}/reject`, { method: 'POST' });
+      load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Reject failed');
+    }
   };
 
   return (
@@ -41,29 +54,28 @@ export default function ApprovalPage() {
         title="Approval Queue"
         subtitle="Review automated Surprise and Comeback signals before they go live"
       />
-      {error && <p className="mb-4 text-sm text-red-400">{error}</p>}
 
-      <div className="overflow-x-auto rounded-xl border border-zinc-800">
-        <table className="w-full text-left text-sm">
-          <thead className="border-b border-zinc-800 bg-zinc-900/80 text-zinc-400">
-            <tr>
-              <th className="px-4 py-3">Match</th>
-              <th className="px-4 py-3">Signal</th>
-              <th className="px-4 py-3">Pick</th>
-              <th className="px-4 py-3">Odds</th>
-              <th className="px-4 py-3">Notes</th>
-              <th className="px-4 py-3">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {signals.length === 0 ? (
+      <AsyncState
+        loading={loading}
+        error={error}
+        empty={signals.length === 0}
+        emptyMessage="No pending signals"
+        onRetry={load}
+      >
+        <div className="overflow-x-auto rounded-xl border border-zinc-800">
+          <table className="w-full text-left text-sm">
+            <thead className="border-b border-zinc-800 bg-zinc-900/80 text-zinc-400">
               <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-zinc-500">
-                  No pending signals
-                </td>
+                <th className="px-4 py-3">Match</th>
+                <th className="px-4 py-3">Signal</th>
+                <th className="px-4 py-3">Pick</th>
+                <th className="px-4 py-3">Odds</th>
+                <th className="px-4 py-3">Notes</th>
+                <th className="px-4 py-3">Actions</th>
               </tr>
-            ) : (
-              signals.map((p) => (
+            </thead>
+            <tbody>
+              {signals.map((p) => (
                 <tr key={p.id} className="border-b border-zinc-800/50">
                   <td className="px-4 py-3 text-white">
                     {p.home_team} vs {p.away_team}
@@ -83,11 +95,11 @@ export default function ApprovalPage() {
                     </div>
                   </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </AsyncState>
     </div>
   );
 }

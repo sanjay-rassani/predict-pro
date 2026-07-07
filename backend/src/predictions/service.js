@@ -2,6 +2,7 @@ import pool from '../db/pool.js';
 import { badRequest, notFound } from '../utils/errors.js';
 import { snapshotOddsOnPublish } from '../live/service.js';
 import { notifySignalApproved } from '../fcm/service.js';
+import { emitSignalApproved } from '../socket/index.js';
 
 const PREDICTION_TYPES = ['1X2', 'DoubleChance', 'UnderOver', 'Surprise', 'Comeback'];
 const MANUAL_TYPES = ['1X2', 'DoubleChance', 'UnderOver'];
@@ -193,6 +194,16 @@ export async function approveSignal(id) {
   const prediction = rows[0];
   const full = await getPredictionById(prediction.id);
   await notifySignalApproved(full);
+  emitSignalApproved({
+    predictionId: full.id,
+    matchId: full.match_id,
+    type: full.type,
+    predictedValue: full.predicted_value,
+    homeTeam: full.home_team,
+    awayTeam: full.away_team,
+    league: full.league,
+    odds: full.odds,
+  });
   return full;
 }
 

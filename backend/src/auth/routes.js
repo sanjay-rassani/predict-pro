@@ -18,4 +18,16 @@ router.post(
   }),
 );
 
+router.post(
+  '/app/login',
+  asyncHandler(async (req, res) => {
+    const { email } = req.body ?? {};
+    if (!email) {
+      throw badRequest('email is required');
+    }
+    const result = await authService.loginAppUser(email);
+    res.json(result);
+  }),
+);
+
 export default router;

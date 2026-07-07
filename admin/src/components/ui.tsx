@@ -110,3 +110,56 @@ export function Badge({ children, tone = 'default' }: { children: ReactNode; ton
     </span>
   );
 }
+
+export function LoadingState({ message = 'Loading…' }: { message?: string }) {
+  return (
+    <div className="flex items-center justify-center py-16 text-sm text-zinc-500">
+      <span className="mr-2 inline-block h-4 w-4 animate-spin rounded-full border-2 border-zinc-600 border-t-[#6A0DAD]" />
+      {message}
+    </div>
+  );
+}
+
+export function EmptyState({ message }: { message: string }) {
+  return <p className="py-16 text-center text-sm text-zinc-500">{message}</p>;
+}
+
+export function ErrorState({
+  message,
+  onRetry,
+}: {
+  message: string;
+  onRetry?: () => void;
+}) {
+  return (
+    <div className="rounded-xl border border-red-900/50 bg-red-950/30 p-6 text-center">
+      <p className="text-sm text-red-300">{message}</p>
+      {onRetry && (
+        <Button variant="secondary" className="mt-4" onClick={onRetry}>
+          Retry
+        </Button>
+      )}
+    </div>
+  );
+}
+
+export function AsyncState({
+  loading,
+  error,
+  empty,
+  emptyMessage = 'Nothing here yet',
+  onRetry,
+  children,
+}: {
+  loading?: boolean;
+  error?: string;
+  empty?: boolean;
+  emptyMessage?: string;
+  onRetry?: () => void;
+  children: ReactNode;
+}) {
+  if (loading) return <LoadingState />;
+  if (error) return <ErrorState message={error} onRetry={onRetry} />;
+  if (empty) return <EmptyState message={emptyMessage} />;
+  return <>{children}</>;
+}

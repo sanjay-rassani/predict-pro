@@ -1,5 +1,6 @@
 import { Server } from 'socket.io';
 import config from '../config/index.js';
+import { isCorsOriginAllowed } from '../config/cors.js';
 import { resolveSocketAuth } from './auth.js';
 import { ROOM } from './rooms.js';
 
@@ -15,7 +16,9 @@ export function getIO() {
 export function initSocket(httpServer) {
   io = new Server(httpServer, {
     cors: {
-      origin: config.corsOrigins,
+      origin: (origin, callback) => {
+        callback(null, isCorsOriginAllowed(origin));
+      },
       credentials: true,
     },
     path: '/socket.io',
@@ -81,4 +84,9 @@ export function emitStandingsUpdate(payload) {
 export function emitLiveOddsUpdate(payload) {
   if (!io) return;
   io.to(ROOM.premiumOdds(payload.matchId)).emit('live:odds', payload);
+}
+
+export function emitSignalApproved(payload) {
+  if (!io) return;
+  io.to(ROOM.liveAll).emit('signal:approved', payload);
 }

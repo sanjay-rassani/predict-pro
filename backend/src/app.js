@@ -1,6 +1,6 @@
 import express from 'express';
 import cors from 'cors';
-import config from './config/index.js';
+import { corsOriginCallback } from './config/cors.js';
 import { requestLogger } from './middleware/requestLogger.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import authRoutes from './auth/routes.js';
@@ -17,7 +17,7 @@ export function createApp() {
 
   app.use(
     cors({
-      origin: config.corsOrigins,
+      origin: corsOriginCallback,
       credentials: true,
     }),
   );

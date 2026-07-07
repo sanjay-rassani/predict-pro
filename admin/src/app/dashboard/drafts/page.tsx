@@ -3,15 +3,17 @@
 import { useCallback, useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import type { Prediction } from '@/lib/types';
-import { Badge, Button, PageHeader } from '@/components/ui';
+import { AsyncState, Badge, Button, PageHeader } from '@/components/ui';
 
 export default function DraftsPage() {
   const [drafts, setDrafts] = useState<Prediction[]>([]);
   const [published, setPublished] = useState<Prediction[]>([]);
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<'drafts' | 'published'>('drafts');
 
   const load = useCallback(async () => {
+    setLoading(true);
     setError('');
     try {
       const [draftRes, pubRes] = await Promise.all([
@@ -21,7 +23,11 @@ export default function DraftsPage() {
       setDrafts(draftRes.data.filter((p) => !p.is_automated_signal));
       setPublished(pubRes.data.filter((p) => !p.is_automated_signal));
     } catch (err) {
+      setDrafts([]);
+      setPublished([]);
       setError(err instanceof Error ? err.message : 'Failed to load');
+    } finally {
+      setLoading(false);
     }
   }, []);
 
@@ -44,7 +50,6 @@ export default function DraftsPage() {
   return (
     <div>
       <PageHeader title="Predictions" subtitle="Drafts and published manual predictions" />
-      {error && <p className="mb-4 text-sm text-red-400">{error}</p>}
 
       <div className="mb-4 flex gap-2">
         <Button variant={tab === 'drafts' ? 'primary' : 'secondary'} onClick={() => setTab('drafts')}>
@@ -58,7 +63,14 @@ export default function DraftsPage() {
         </Button>
       </div>
 
-      <div className="overflow-x-auto rounded-xl border border-zinc-800">
+      <AsyncState
+        loading={loading}
+        error={error}
+        empty={rows.length === 0}
+        emptyMessage={`No ${tab} predictions`}
+        onRetry={load}
+      >
+        <div className="overflow-x-auto rounded-xl border border-zinc-800">
         <table className="w-full text-left text-sm">
           <thead className="border-b border-zinc-800 bg-zinc-900/80 text-zinc-400">
             <tr>
@@ -71,14 +83,7 @@ export default function DraftsPage() {
             </tr>
           </thead>
           <tbody>
-            {rows.length === 0 ? (
-              <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-zinc-500">
-                  No {tab} predictions
-                </td>
-              </tr>
-            ) : (
-              rows.map((p) => (
+            {rows.map((p) => (
                 <tr key={p.id} className="border-b border-zinc-800/50">
                   <td className="px-4 py-3 text-white">
                     {p.home_team} vs {p.away_team}
@@ -104,11 +109,11 @@ export default function DraftsPage() {
                     </div>
                   </td>
                 </tr>
-              ))
-            )}
+              ))}
           </tbody>
         </table>
       </div>
+      </AsyncState>
     </div>
   );
 }

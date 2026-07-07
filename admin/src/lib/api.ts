@@ -1,4 +1,8 @@
+import { formatFetchError, parseApiErrorBody } from './api-errors';
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
+
+export { parseApiErrorBody, formatFetchError } from './api-errors';
 
 export function getToken(): string | null {
   if (typeof window === 'undefined') return null;
@@ -24,11 +28,16 @@ export async function api<T>(path: string, options: RequestInit = {}): Promise<T
     headers.set('Authorization', `Bearer ${token}`);
   }
 
-  const res = await fetch(`${API_URL}${path}`, { ...options, headers });
+  let res: Response;
+  try {
+    res = await fetch(`${API_URL}${path}`, { ...options, headers });
+  } catch (err) {
+    throw new Error(formatFetchError(err));
+  }
 
   if (!res.ok) {
-    const err = await res.json().catch(() => ({ error: res.statusText }));
-    throw new Error(err.error ?? 'Request failed');
+    const err = await res.json().catch(() => ({}));
+    throw new Error(parseApiErrorBody(err, res.statusText));
   }
 
   if (res.status === 204) return undefined as T;

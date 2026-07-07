@@ -3,23 +3,28 @@
 import { useCallback, useEffect, useState } from 'react';
 import { api, downloadCsv } from '@/lib/api';
 import type { AdminSettings } from '@/lib/types';
-import { Button, Input, PageHeader } from '@/components/ui';
+import { AsyncState, Button, Input, PageHeader } from '@/components/ui';
 
 export default function SettingsPage() {
   const [settings, setSettings] = useState<AdminSettings | null>(null);
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
   const [exportType, setExportType] = useState('');
   const [exportLeague, setExportLeague] = useState('');
   const [exportFrom, setExportFrom] = useState('');
   const [exportTo, setExportTo] = useState('');
 
   const load = useCallback(async () => {
+    setLoading(true);
     setError('');
     try {
       const res = await api<{ data: AdminSettings }>('/admin/settings');
       setSettings(res.data);
     } catch (err) {
+      setSettings(null);
       setError(err instanceof Error ? err.message : 'Failed to load settings');
+    } finally {
+      setLoading(false);
     }
   }, []);
 
@@ -66,8 +71,8 @@ export default function SettingsPage() {
   return (
     <div>
       <PageHeader title="Settings" subtitle="API health, notifications, and data export" />
-      {error && <p className="mb-4 text-sm text-red-400">{error}</p>}
 
+      <AsyncState loading={loading} error={error} onRetry={load}>
       {settings && (
         <div className="space-y-6">
           <section className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6">
@@ -128,6 +133,7 @@ export default function SettingsPage() {
           </section>
         </div>
       )}
+      </AsyncState>
     </div>
   );
 }

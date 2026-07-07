@@ -116,11 +116,17 @@ const socket = io('http://localhost:3001', {
 
 ## Section status
 
-- **Section 1:** Express, Postgres, JWT auth, REST endpoints ✅
-- **Section 2:** Socket.IO live scores, standings, premium odds ✅
-- **Section 3:** Admin dashboard UI ✅
-- **Section 4:** Automated scanner + FCM push ✅
-- **Section 5:** Flutter free screens (next)
+- **Sections 0–7:** Complete ✅
+
+## API error format
+
+All error responses use a consistent shape:
+
+```json
+{ "error": "Human-readable message", "code": "BAD_REQUEST" }
+```
+
+Codes include `BAD_REQUEST`, `UNAUTHORIZED`, `FORBIDDEN`, `NOT_FOUND`, `CONFLICT`, `INTERNAL_ERROR`.
 
 ## Automated scanner (Section 4)
 

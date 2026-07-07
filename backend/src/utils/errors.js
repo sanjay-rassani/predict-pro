@@ -1,9 +1,21 @@
 export class AppError extends Error {
-  constructor(statusCode, message) {
+  constructor(statusCode, message, code) {
     super(message);
     this.statusCode = statusCode;
+    this.code = code ?? statusToCode(statusCode);
     this.name = 'AppError';
   }
+}
+
+function statusToCode(statusCode) {
+  const map = {
+    400: 'BAD_REQUEST',
+    401: 'UNAUTHORIZED',
+    403: 'FORBIDDEN',
+    404: 'NOT_FOUND',
+    409: 'CONFLICT',
+  };
+  return map[statusCode] ?? 'APP_ERROR';
 }
 
 export function notFound(message = 'Not found') {

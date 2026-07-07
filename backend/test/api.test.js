@@ -42,6 +42,22 @@ describe('Predict Pro API', () => {
       password: 'wrong-password',
     });
     assert.equal(res.status, 401);
+    assert.equal(res.body.code, 'UNAUTHORIZED');
+    assert.ok(res.body.error);
+  });
+
+  it('POST /auth/app/login returns demo user or 401', async () => {
+    const ok = await request(app).post('/auth/app/login').send({
+      email: 'free@predictpro.local',
+    });
+    assert.equal(ok.status, 200);
+    assert.equal(ok.body.user.role, 'free');
+
+    const bad = await request(app).post('/auth/app/login').send({
+      email: 'missing@predictpro.local',
+    });
+    assert.equal(bad.status, 401);
+    assert.equal(bad.body.code, 'UNAUTHORIZED');
   });
 
   it('admin can create demo match and manual prediction draft', async () => {
@@ -114,6 +130,40 @@ describe('Predict Pro API', () => {
     const res = await request(app).get('/analytics/signals?period=today');
     assert.equal(res.status, 200);
     assert.ok(res.body.data.summary);
+  });
+
+  it('GET /matches supports search filter', async () => {
+    await request(app).post('/matches/demo').set('Authorization', `Bearer ${adminToken}`);
+    const res = await request(app).get('/matches?search=Demo');
+    assert.equal(res.status, 200);
+    assert.ok(res.body.data.some((m) => m.home_team.includes('Demo')));
+  });
+
+  it('admin can archive a published prediction', async () => {
+    const matchRes = await request(app)
+      .post('/matches/demo')
+      .set('Authorization', `Bearer ${adminToken}`);
+    const predRes = await request(app)
+      .post('/predictions')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({
+        match_id: matchRes.body.data.id,
+        type: '1X2',
+        predicted_value: '1',
+        publish_status: 'published',
+      });
+    const archiveRes = await request(app)
+      .post(`/predictions/${predRes.body.data.id}/archive`)
+      .set('Authorization', `Bearer ${adminToken}`);
+    assert.equal(archiveRes.status, 200);
+    assert.equal(archiveRes.body.data.publish_status, 'archived');
+  });
+
+  it('returns consistent error shape for bad requests', async () => {
+    const res = await request(app).post('/auth/app/login').send({});
+    assert.equal(res.status, 400);
+    assert.equal(res.body.code, 'BAD_REQUEST');
+    assert.ok(res.body.error);
   });
 
   it('migrations run down cleanly', async () => {

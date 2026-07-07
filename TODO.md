@@ -201,32 +201,32 @@ Goal: signal scanner that queues signals for approval, and push on approval.
 Goal: dark theme (purple `#6A0DAD`), free-tier screens working against backend.
 
 ### Checkpoint 5.1 — App foundation
-- [ ] Flutter project theme (dark, purple accent `#6A0DAD`)
-- [ ] Networking layer (REST client) + WebSocket client
-- [ ] Simple auth/session + role awareness (free/premium)
-- [ ] Navigation/routing skeleton
+- [x] Flutter project theme (dark, purple accent `#6A0DAD`)
+- [x] Networking layer (REST client) + WebSocket client
+- [x] Simple auth/session + role awareness (free/premium)
+- [x] Navigation/routing skeleton
 
 ### Checkpoint 5.2 — Home
-- [ ] Featured matches, upcoming fixtures, category tabs
+- [x] Featured matches, upcoming fixtures, category tabs
 
 ### Checkpoint 5.3 — Live Scores
-- [ ] Real-time via WebSocket: score, minute, halftime, status, team logos
-- [ ] League standings
+- [x] Real-time via WebSocket: score, minute, halftime, status, team logos
+- [x] League standings
 
 ### Checkpoint 5.4 — 1X2 Predictions
-- [ ] Published matches with 1/X/2 selection boxes and odds
+- [x] Published matches with 1/X/2 selection boxes and odds
 
 ### Checkpoint 5.5 — Under/Over
-- [ ] Separate tab: Over 2.5 / Under 2.5 predictions with odds
+- [x] Separate tab: Over 2.5 / Under 2.5 predictions with odds
 
 ### Checkpoint 5.6 — News
-- [ ] Feed of published articles (injuries, transfers, lineups)
+- [x] Feed of published articles (injuries, transfers, lineups)
 
 ### Checkpoint 5.7 — My Predictions
-- [ ] History with GREEN=win / RED=loss badges (no profit/loss math)
+- [x] History with GREEN=win / RED=loss badges (no profit/loss math)
 
 ### Checkpoint 5.8 — Verify
-- [ ] All free screens load real data; live scores update in real time
+- [x] All free screens load real data; live scores update in real time
 
 ---
 
@@ -234,25 +234,25 @@ Goal: dark theme (purple `#6A0DAD`), free-tier screens working against backend.
 Goal: premium screens, role-based routing, and lock screens for free users.
 
 ### Checkpoint 6.1 — Role-based routing & lock screen
-- [ ] Premium Lock screen placeholder: "Upgrade to Premium to unlock real-time smart signals."
-- [ ] Free users hitting locked screens (5, 6, 9) see lock placeholder (no purchase flow)
+- [x] Premium Lock screen placeholder: "Upgrade to Premium to unlock real-time smart signals."
+- [x] Free users hitting locked screens (5, 6, 9) see lock placeholder (no purchase flow)
 
 ### Checkpoint 6.2 — Odds Surprises (Premium)
-- [ ] Live feed of approved Surprise signals with real-time odds detail
+- [x] Live feed of approved Surprise signals with real-time odds detail
 
 ### Checkpoint 6.3 — Game Back / Comeback Signals (Premium)
-- [ ] Live feed of approved Comeback signals with real-time odds detail
+- [x] Live feed of approved Comeback signals with real-time odds detail
 
 ### Checkpoint 6.4 — Signal History & Analytics (Premium)
-- [ ] Total signals, wins, losses, success rate %, grouped by Surprise vs Comeback
-- [ ] Filters: Today, Last 7 Days, Last 30 Days, League
+- [x] Total signals, wins, losses, success rate %, grouped by Surprise vs Comeback
+- [x] Filters: Today, Last 7 Days, Last 30 Days, League
 
 ### Checkpoint 6.5 — Live odds & push
-- [ ] Real-time odds updates for premium screens via WebSocket
-- [ ] FCM push received on approved signals
+- [x] Real-time odds updates for premium screens via WebSocket
+- [x] FCM push received on approved signals
 
 ### Checkpoint 6.6 — Verify
-- [ ] Premium account sees signals/odds; free account sees locks
+- [x] Premium account sees signals/odds; free account sees locks
 
 ---
 
@@ -260,18 +260,18 @@ Goal: premium screens, role-based routing, and lock screens for free users.
 Goal: production-quality edges.
 
 ### Checkpoint 7.1 — UX states
-- [ ] Loading, empty, and error states across app + admin
+- [x] Loading, empty, and error states across app + admin
 
 ### Checkpoint 7.2 — Error handling
-- [ ] Consistent API error responses; client-side handling
-- [ ] Graceful WebSocket reconnect
+- [x] Consistent API error responses; client-side handling
+- [x] Graceful WebSocket reconnect
 
 ### Checkpoint 7.3 — Tests
-- [ ] Basic backend tests (auth, predictions, scanner logic)
-- [ ] Basic admin + Flutter smoke tests
+- [x] Basic backend tests (auth, predictions, scanner logic)
+- [x] Basic admin + Flutter smoke tests
 
 ### Checkpoint 7.4 — Final review
-- [ ] Feature Access Matrix behavior verified per role
-- [ ] Scope extensions verified: drafts, archive, admin search/stats, signal history filters, CSV export
-- [ ] No hardcoded secrets; envs documented
-- [ ] Out-of-scope items confirmed excluded (payments, subscriptions, external platform sharing e.g. Telegram/Discord)
+- [x] Feature Access Matrix behavior verified per role
+- [x] Scope extensions verified: drafts, archive, admin search/stats, signal history filters, CSV export
+- [x] No hardcoded secrets; envs documented
+- [x] Out-of-scope items confirmed excluded (payments, subscriptions, external platform sharing e.g. Telegram/Discord)

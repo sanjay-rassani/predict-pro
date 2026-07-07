@@ -1,0 +1,58 @@
+# Predict Pro — full stack (Postgres + Backend + Admin)
+# One command:  docker compose up -d --build
+# Values come from the root .env file (see .env.example). All have safe defaults.
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-predict_pro}
+    ports:
+      - '${POSTGRES_PORT:-5432}:5432'
+    volumes:
+      - predict_pro_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-predict_pro}']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 3001
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-predict_pro}
+      JWT_SECRET: ${JWT_SECRET:-dev-jwt-secret-change-in-production}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@predictpro.local}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin123}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000,http://localhost:3001}
+      LIVE_DEMO_MODE: ${LIVE_DEMO_MODE:-true}
+      LIVE_POLL_INTERVAL_MS: ${LIVE_POLL_INTERVAL_MS:-30000}
+      API_FOOTBALL_KEY: ${API_FOOTBALL_KEY:-}
+      FCM_ENABLED: ${FCM_ENABLED:-false}
+    ports:
+      - '${BACKEND_PORT:-3001}:3001'
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  admin:
+    build:
+      context: ./admin
+      args:
+        # Browser-facing URL for the backend (baked at build time)
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3001}
+    ports:
+      - '${ADMIN_PORT:-3000}:3000'
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  predict_pro_pg:

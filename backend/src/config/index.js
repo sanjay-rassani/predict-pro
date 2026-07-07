@@ -27,6 +27,7 @@ const config = {
     .split(',')
     .map((o) => o.trim())
     .filter(Boolean),
+  corsAllowLocalhostInDev: process.env.CORS_ALLOW_LOCALHOST_IN_DEV !== 'false',
   livePollIntervalMs: Number(process.env.LIVE_POLL_INTERVAL_MS) || 30_000,
   liveDemoMode: process.env.LIVE_DEMO_MODE === 'true' || !process.env.API_FOOTBALL_KEY,
   fcmEnabled: process.env.FCM_ENABLED === 'true',
