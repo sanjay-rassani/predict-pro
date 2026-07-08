@@ -4,12 +4,27 @@ import config from '../config/index.js';
 import pool from '../db/pool.js';
 import { unauthorized } from '../utils/errors.js';
 
-export async function loginAppUser(email) {
-  const { rows } = await pool.query('SELECT id, email, role FROM users WHERE email = $1', [email]);
+export async function loginAppUser(email, password) {
+  const normalizedEmail = typeof email === 'string' ? email.trim().toLowerCase() : '';
+  const { rows } = await pool.query(
+    'SELECT id, email, role, password_hash FROM users WHERE email = $1',
+    [normalizedEmail],
+  );
   if (rows.length === 0) {
-    throw unauthorized('User not found');
+    throw unauthorized('Invalid email or password');
   }
-  return { user: rows[0] };
+
+  const user = rows[0];
+  if (!user.password_hash) {
+    throw unauthorized('Password not set for this account. Contact an admin.');
+  }
+
+  const valid = await bcrypt.compare(password, user.password_hash);
+  if (!valid) {
+    throw unauthorized('Invalid email or password');
+  }
+
+  return { user: { id: user.id, email: user.email, role: user.role } };
 }
 
 export async function loginAdmin(email, password) {

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../config/app_config.dart';
 import '../providers/live_scores_notifier.dart';
 import '../widgets/common_widgets.dart';
+import 'match_details_screen.dart';
 
 class LiveScoresScreen extends StatefulWidget {
   const LiveScoresScreen({super.key, this.onRefresh});
@@ -69,7 +70,13 @@ class _LiveScoresScreenState extends State<LiveScoresScreen> {
                     ],
                   ),
                 ),
-              for (final m in leagueMatches) MatchCard(match: m),
+              for (final m in leagueMatches)
+                MatchCard(
+                  match: m,
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => MatchDetailsScreen(match: m)),
+                  ),
+                ),
               if (standings.isNotEmpty) ...[
                 const Padding(
                   padding: EdgeInsets.fromLTRB(16, 20, 16, 8),

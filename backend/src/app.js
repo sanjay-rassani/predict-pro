@@ -8,6 +8,7 @@ import matchRoutes from './matches/routes.js';
 import predictionRoutes from './predictions/routes.js';
 import newsRoutes from './news/routes.js';
 import adminRoutes from './admin/routes.js';
+import userRoutes from './users/routes.js';
 import analyticsRoutes from './analytics/routes.js';
 import notificationRoutes from './notifications/routes.js';
 import pool from './db/pool.js';
@@ -38,6 +39,7 @@ export function createApp() {
   app.use('/predictions', predictionRoutes);
   app.use('/news', newsRoutes);
   app.use('/admin', adminRoutes);
+  app.use('/users', userRoutes);
   app.use('/analytics', analyticsRoutes);
   app.use('/notifications', notificationRoutes);
 

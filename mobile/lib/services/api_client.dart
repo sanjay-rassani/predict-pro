@@ -56,8 +56,8 @@ class ApiClient {
     return body as Map<String, dynamic>;
   }
 
-  Future<AppUser> loginApp(String email) async {
-    final json = await _post('/auth/app/login', {'email': email});
+  Future<AppUser> loginApp(String email, String password) async {
+    final json = await _post('/auth/app/login', {'email': email, 'password': password});
     return AppUser.fromJson(json['user'] as Map<String, dynamic>);
   }
 

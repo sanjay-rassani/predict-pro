@@ -21,11 +21,11 @@ router.post(
 router.post(
   '/app/login',
   asyncHandler(async (req, res) => {
-    const { email } = req.body ?? {};
-    if (!email) {
-      throw badRequest('email is required');
+    const { email, password } = req.body ?? {};
+    if (!email || !password) {
+      throw badRequest('email and password are required');
     }
-    const result = await authService.loginAppUser(email);
+    const result = await authService.loginAppUser(email, password);
     res.json(result);
   }),
 );

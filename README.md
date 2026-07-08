@@ -52,7 +52,7 @@ mobile app. Users come in two tiers:
   (WebSocket) odds, analytics, and push notifications.
 
 There is **no payment flow** in this phase — a user's tier is simply a `role`
-field (`free` / `premium`) set directly in the database.
+field (`free` / `premium`) managed from the admin dashboard's **Users** screen.
 
 ### How it works (end to end)
 
@@ -131,7 +131,8 @@ Design: dark theme with a purple accent (`#6A0DAD`).
 | 3 | **Manual Entry** | Modal to publish a prediction: type, odds, confidence, notes |
 | 4 | **Approval Queue** | Pending automated signals with Approve / Reject |
 | 5 | **News Management** | Create / edit / delete / publish articles |
-| 6 | **Settings / API Health** | API quota & endpoint status, toggle push dispatch on/off |
+| 6 | **Users** | Create app users and set their tier (free / premium); edit & delete |
+| 7 | **Settings / API Health** | API quota & endpoint status, toggle push dispatch on/off |
 
 ### Real-time & notifications
 
@@ -344,10 +345,12 @@ flutter run -d chrome \
 | Where | Email | Password | Role |
 |-------|-------|----------|------|
 | Admin dashboard | `admin@predictpro.local` | `admin123` | admin |
-| Mobile app | `free@predictpro.local` | — (email only) | free |
-| Mobile app | `premium@predictpro.local` | — (email only) | premium |
+| Mobile app | `free@predictpro.local` | `free123` | free |
+| Mobile app | `premium@predictpro.local` | `premium123` | premium |
 
 Change the admin credentials via `ADMIN_EMAIL` / `ADMIN_PASSWORD` (see below).
+App users log in with **email + password**; create more of them (and set/reset
+passwords) from the admin dashboard's **Users** screen.
 
 ---
 
@@ -474,7 +477,7 @@ Before deploying to real users:
 Confirmed **not** included in this build:
 
 - Payments / subscriptions / in-app purchases
-- User self-registration or password auth (roles are set manually in the DB)
+- User self-registration or password auth (users are created by the admin)
 - Telegram, Discord, or other external-platform sharing
 - Multi-admin accounts
 
@@ -485,6 +488,7 @@ Confirmed **not** included in this build:
 | Doc | Contents |
 |-----|----------|
 | [`SETUP.md`](SETUP.md) | Detailed cross-platform setup (server + mobile), troubleshooting, production |
+| [`DEMO.md`](DEMO.md) | Step-by-step client demo playbook covering every feature and edge case |
 | [`backend/README.md`](backend/README.md) | Full API reference, WebSocket events, scanner & FCM behavior |
 | [`mobile/README.md`](mobile/README.md) | Mobile run/build details, screens, config |
 | [`TODO.md`](TODO.md) | Section-by-section build checklist |

@@ -10,6 +10,7 @@
     "migrate": "node scripts/migrate.js up",
     "migrate:down": "node scripts/migrate.js down",
     "seed": "node scripts/seed.js",
+    "seed:demo": "node scripts/seed-demo-data.js",
     "test": "node --test --test-concurrency=1 test/**/*.test.js",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",

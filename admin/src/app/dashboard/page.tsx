@@ -1,11 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
 import type { DashboardStats } from '@/lib/types';
-import { AsyncState, PageHeader, StatCard } from '@/components/ui';
+import { AsyncState, Button, PageHeader, StatCard } from '@/components/ui';
 
 export default function DashboardPage() {
+  const router = useRouter();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
@@ -31,6 +33,17 @@ export default function DashboardPage() {
   return (
     <div>
       <PageHeader title="Dashboard" subtitle="Overview of platform activity" />
+
+      <div className="mb-6 flex flex-wrap gap-3">
+        <Button onClick={() => router.push('/dashboard/matches')}>+ Add Prediction</Button>
+        <Button variant="secondary" onClick={() => router.push('/dashboard/approval')}>
+          Approval Queue
+        </Button>
+        <Button variant="secondary" onClick={() => router.push('/dashboard/news')}>
+          Manage News
+        </Button>
+      </div>
+
       <AsyncState
         loading={loading}
         error={error}

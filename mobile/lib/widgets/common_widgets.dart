@@ -145,43 +145,98 @@ class MatchScoreRow extends StatelessWidget {
 }
 
 class MatchCard extends StatelessWidget {
-  const MatchCard({super.key, required this.match, this.trailing});
+  const MatchCard({super.key, required this.match, this.trailing, this.onTap});
 
   final MatchModel match;
   final Widget? trailing;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    match.league,
-                    style: TextStyle(fontSize: 12, color: Colors.white.withValues(alpha: 0.6)),
-                  ),
-                ),
-                if (match.isLive)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: AppColors.purple.withValues(alpha: 0.25),
-                      borderRadius: BorderRadius.circular(4),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      match.league,
+                      style: TextStyle(fontSize: 12, color: Colors.white.withValues(alpha: 0.6)),
                     ),
-                    child: const Text('LIVE', style: TextStyle(fontSize: 10, color: AppColors.purple)),
                   ),
-                if (trailing != null) trailing!,
+                  if (match.isLive)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: AppColors.purple.withValues(alpha: 0.25),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: const Text('LIVE', style: TextStyle(fontSize: 10, color: AppColors.purple)),
+                    ),
+                  ?trailing,
+                  if (onTap != null)
+                    const Padding(
+                      padding: EdgeInsets.only(left: 4),
+                      child: Icon(Icons.chevron_right, size: 18, color: Colors.white38),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              MatchScoreRow(match: match),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class StatTile extends StatelessWidget {
+  const StatTile({
+    super.key,
+    required this.label,
+    required this.value,
+    this.icon,
+    this.color,
+  });
+
+  final String label;
+  final String value;
+  final IconData? icon;
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Card(
+        margin: const EdgeInsets.symmetric(horizontal: 4),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+          child: Column(
+            children: [
+              if (icon != null) ...[
+                Icon(icon, size: 18, color: color ?? AppColors.purple),
+                const SizedBox(height: 4),
               ],
-            ),
-            const SizedBox(height: 10),
-            MatchScoreRow(match: match),
-          ],
+              Text(
+                value,
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: color),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                label,
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 11, color: Colors.white.withValues(alpha: 0.6)),
+              ),
+            ],
+          ),
         ),
       ),
     );

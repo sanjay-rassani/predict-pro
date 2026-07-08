@@ -24,8 +24,8 @@ class SessionService extends ChangeNotifier {
     }
   }
 
-  Future<void> login(String email) async {
-    final loggedIn = await _api.loginApp(email);
+  Future<void> login(String email, String password) async {
+    final loggedIn = await _api.loginApp(email, password);
     _user = loggedIn;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('user_email', loggedIn.email);

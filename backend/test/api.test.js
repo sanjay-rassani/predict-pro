@@ -46,18 +46,54 @@ describe('Predict Pro API', () => {
     assert.ok(res.body.error);
   });
 
-  it('POST /auth/app/login returns demo user or 401', async () => {
+  it('POST /auth/app/login returns demo user with correct password', async () => {
     const ok = await request(app).post('/auth/app/login').send({
       email: 'free@predictpro.local',
+      password: 'free123',
     });
     assert.equal(ok.status, 200);
     assert.equal(ok.body.user.role, 'free');
 
-    const bad = await request(app).post('/auth/app/login').send({
-      email: 'missing@predictpro.local',
+    const wrongPassword = await request(app).post('/auth/app/login').send({
+      email: 'free@predictpro.local',
+      password: 'nope-wrong',
     });
-    assert.equal(bad.status, 401);
-    assert.equal(bad.body.code, 'UNAUTHORIZED');
+    assert.equal(wrongPassword.status, 401);
+    assert.equal(wrongPassword.body.code, 'UNAUTHORIZED');
+
+    const missing = await request(app).post('/auth/app/login').send({
+      email: 'missing@predictpro.local',
+      password: 'whatever',
+    });
+    assert.equal(missing.status, 401);
+    assert.equal(missing.body.code, 'UNAUTHORIZED');
+  });
+
+  it('admin can create an app user with a password and that user can log in', async () => {
+    const createRes = await request(app)
+      .post('/users')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({ email: 'New.User@Example.com', role: 'premium', password: 'secret123' });
+    assert.equal(createRes.status, 201);
+    assert.equal(createRes.body.data.email, 'new.user@example.com');
+    assert.equal(createRes.body.data.role, 'premium');
+    assert.ok(!('password_hash' in createRes.body.data));
+
+    const loginRes = await request(app).post('/auth/app/login').send({
+      email: 'new.user@example.com',
+      password: 'secret123',
+    });
+    assert.equal(loginRes.status, 200);
+    assert.equal(loginRes.body.user.role, 'premium');
+  });
+
+  it('POST /users rejects short passwords', async () => {
+    const res = await request(app)
+      .post('/users')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({ email: 'shortpw@example.com', role: 'free', password: '123' });
+    assert.equal(res.status, 400);
+    assert.equal(res.body.code, 'BAD_REQUEST');
   });
 
   it('admin can create demo match and manual prediction draft', async () => {

@@ -58,3 +58,10 @@ export type LoginResponse = {
   token: string;
   admin: { id: number; email: string };
 };
+
+export type AppUser = {
+  id: number;
+  email: string;
+  role: 'free' | 'premium';
+  created_at: string;
+};

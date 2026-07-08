@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../config/app_config.dart';
+import '../models/models.dart';
 import '../providers/live_scores_notifier.dart';
+import '../services/api_client.dart';
 import '../widgets/common_widgets.dart';
+import 'match_details_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key, this.onRefresh});
@@ -16,6 +19,8 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   String? _category;
+  final _api = ApiClient();
+  int? _predictionCount;
 
   @override
   void initState() {
@@ -23,11 +28,28 @@ class _HomeScreenState extends State<HomeScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<LiveScoresNotifier>().load(query: {'published': 'true'});
     });
+    _loadPredictionCount();
   }
 
-  List<dynamic> _filterByCategory(List<dynamic> matches) {
+  Future<void> _loadPredictionCount() async {
+    try {
+      final list = await _api.getPredictions(query: {'publish_status': 'published'});
+      if (!mounted) return;
+      setState(() => _predictionCount = list.length);
+    } catch (_) {
+      // Stats are best-effort; ignore failures here.
+    }
+  }
+
+  List<MatchModel> _filterByCategory(List<MatchModel> matches) {
     if (_category == null) return matches;
     return matches.where((m) => m.market == _category).toList();
+  }
+
+  void _openMatch(MatchModel match) {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => MatchDetailsScreen(match: match)),
+    );
   }
 
   @override
@@ -48,11 +70,36 @@ class _HomeScreenState extends State<HomeScreen> {
           color: AppColors.purple,
           onRefresh: () async {
             await live.load(query: {'published': 'true'});
+            await _loadPredictionCount();
             await widget.onRefresh?.call();
           },
           child: ListView(
             padding: const EdgeInsets.only(bottom: 24),
             children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(12, 12, 12, 4),
+                child: Row(
+                  children: [
+                    StatTile(
+                      label: 'Live Now',
+                      value: '${live.liveMatches.length}',
+                      icon: Icons.sports_soccer,
+                      color: AppColors.purple,
+                    ),
+                    StatTile(
+                      label: 'Upcoming',
+                      value: '${live.upcomingMatches.length}',
+                      icon: Icons.schedule,
+                    ),
+                    StatTile(
+                      label: 'Predictions',
+                      value: _predictionCount != null ? '$_predictionCount' : '—',
+                      icon: Icons.insights,
+                      color: AppColors.win,
+                    ),
+                  ],
+                ),
+              ),
               if (categories.isNotEmpty) ...[
                 SizedBox(
                   height: 44,
@@ -92,7 +139,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Text('No live matches right now', style: TextStyle(color: Colors.white54)),
                 )
               else
-                for (final m in featured) MatchCard(match: m),
+                for (final m in featured) MatchCard(match: m, onTap: () => _openMatch(m)),
               const Padding(
                 padding: EdgeInsets.fromLTRB(16, 16, 16, 4),
                 child: Text('Upcoming Fixtures', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
@@ -106,9 +153,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 for (final m in upcoming)
                   Card(
                     margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                    clipBehavior: Clip.antiAlias,
                     child: ListTile(
+                      onTap: () => _openMatch(m),
                       title: Text('${m.homeTeam} vs ${m.awayTeam}'),
                       subtitle: Text('${m.league} · ${timeFmt.format(m.matchDatetime.toLocal())}'),
+                      trailing: const Icon(Icons.chevron_right, size: 18, color: Colors.white38),
                     ),
                   ),
             ],

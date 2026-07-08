@@ -12,18 +12,29 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _controller = TextEditingController(text: 'free@predictpro.local');
+  final _passwordController = TextEditingController(text: 'free123');
   bool _loading = false;
+  bool _obscurePassword = true;
   String? _error;
+
+  void _fillDemo(String email, String password) {
+    _controller.text = email;
+    _passwordController.text = password;
+  }
 
   Future<void> _login() async {
     final email = _controller.text.trim();
-    if (email.isEmpty) return;
+    final password = _passwordController.text;
+    if (email.isEmpty || password.isEmpty) {
+      setState(() => _error = 'Email and password are required');
+      return;
+    }
     setState(() {
       _loading = true;
       _error = null;
     });
     try {
-      await context.read<SessionService>().login(email);
+      await context.read<SessionService>().login(email, password);
     } catch (e) {
       setState(() => _error = e.toString());
     } finally {
@@ -34,6 +45,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   void dispose() {
     _controller.dispose();
+    _passwordController.dispose();
     super.dispose();
   }
 
@@ -70,16 +82,30 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
               const SizedBox(height: 12),
+              TextField(
+                controller: _passwordController,
+                obscureText: _obscurePassword,
+                onSubmitted: (_) => _login(),
+                decoration: InputDecoration(
+                  labelText: 'Password',
+                  border: const OutlineInputBorder(),
+                  suffixIcon: IconButton(
+                    icon: Icon(_obscurePassword ? Icons.visibility : Icons.visibility_off),
+                    onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
               Wrap(
                 spacing: 8,
                 children: [
                   ActionChip(
                     label: const Text('Free user'),
-                    onPressed: () => _controller.text = 'free@predictpro.local',
+                    onPressed: () => _fillDemo('free@predictpro.local', 'free123'),
                   ),
                   ActionChip(
                     label: const Text('Premium user'),
-                    onPressed: () => _controller.text = 'premium@predictpro.local',
+                    onPressed: () => _fillDemo('premium@predictpro.local', 'premium123'),
                   ),
                 ],
               ),

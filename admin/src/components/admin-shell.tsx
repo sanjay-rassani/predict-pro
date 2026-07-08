@@ -10,6 +10,7 @@ const nav = [
   { href: '/dashboard/drafts', label: 'Drafts' },
   { href: '/dashboard/approval', label: 'Approval Queue' },
   { href: '/dashboard/news', label: 'News' },
+  { href: '/dashboard/users', label: 'Users' },
   { href: '/dashboard/settings', label: 'Settings' },
 ];
 

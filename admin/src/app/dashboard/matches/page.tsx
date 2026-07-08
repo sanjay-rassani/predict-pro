@@ -120,7 +120,10 @@ export default function MatchesPage() {
 
   return (
     <div>
-      <PageHeader title="Matches" subtitle="Upcoming and active fixtures" />
+      <PageHeader
+        title="Matches"
+        subtitle="Upcoming and active fixtures — click “+ Add Prediction” on any match to publish a tip"
+      />
 
       <div className="mb-4 flex flex-wrap gap-3">
         <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="w-40" />
@@ -186,8 +189,8 @@ export default function MatchesPage() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex gap-2">
-                      <Button variant="ghost" onClick={() => openModal(m)}>
-                        Predict
+                      <Button onClick={() => openModal(m)}>
+                        + Add Prediction
                       </Button>
                       <Button variant="secondary" onClick={() => togglePublish(m)}>
                         {m.published ? 'Unpublish' : 'Publish'}
@@ -201,7 +204,7 @@ export default function MatchesPage() {
         </table>
       </div>
 
-      <Modal open={modalOpen} title="Manual prediction" onClose={() => setModalOpen(false)}>
+      <Modal open={modalOpen} title="Add Prediction" onClose={() => setModalOpen(false)}>
         {selectedMatch && (
           <p className="mb-4 text-sm text-zinc-400">
             {selectedMatch.home_team} vs {selectedMatch.away_team}

@@ -10,6 +10,7 @@ const MIGRATIONS = [
   { id: '001', up: '001_initial_schema.up.sql', down: '001_initial_schema.down.sql' },
   { id: '002', up: '002_live_odds.up.sql', down: '002_live_odds.down.sql' },
   { id: '003', up: '003_device_tokens.up.sql', down: '003_device_tokens.down.sql' },
+  { id: '004', up: '004_user_passwords.up.sql', down: '004_user_passwords.down.sql' },
 ];
 
 async function ensureMigrationsTable(client) {

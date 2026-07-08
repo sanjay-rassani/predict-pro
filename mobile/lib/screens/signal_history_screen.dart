@@ -131,6 +131,20 @@ class _SummaryGrid extends StatelessWidget {
     final surprise = analytics.byType['Surprise'];
     final comeback = analytics.byType['Comeback'];
 
+    final resolved = analytics.wins + analytics.losses;
+    final pending = analytics.total - resolved;
+
+    final oddsValues = analytics.signals
+        .map((s) => s.oddsDisplay)
+        .whereType<double>()
+        .toList();
+    final avgOdds = oddsValues.isNotEmpty
+        ? oddsValues.reduce((a, b) => a + b) / oddsValues.length
+        : null;
+    final bestOdds = oddsValues.isNotEmpty
+        ? oddsValues.reduce((a, b) => a > b ? a : b)
+        : null;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -138,25 +152,91 @@ class _SummaryGrid extends StatelessWidget {
         const SizedBox(height: 8),
         Row(
           children: [
-            Expanded(child: _StatCard(label: 'Total', value: '${analytics.total}')),
+            _StatCard(label: 'Total', value: '${analytics.total}'),
             const SizedBox(width: 8),
-            Expanded(child: _StatCard(label: 'Wins', value: '${analytics.wins}', color: AppColors.win)),
+            _StatCard(label: 'Wins', value: '${analytics.wins}', color: AppColors.win),
             const SizedBox(width: 8),
-            Expanded(child: _StatCard(label: 'Losses', value: '${analytics.losses}', color: AppColors.loss)),
+            _StatCard(label: 'Losses', value: '${analytics.losses}', color: AppColors.loss),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            _StatCard(label: 'Pending', value: '$pending'),
             const SizedBox(width: 8),
-            Expanded(
-              child: _StatCard(
-                label: 'Success',
-                value: analytics.successRate != null ? '${analytics.successRate}%' : '—',
-              ),
+            _StatCard(label: 'Resolved', value: '$resolved'),
+            const SizedBox(width: 8),
+            _StatCard(
+              label: 'Avg Odds',
+              value: avgOdds != null ? avgOdds.toStringAsFixed(2) : '—',
+            ),
+            const SizedBox(width: 8),
+            _StatCard(
+              label: 'Best Odds',
+              value: bestOdds != null ? bestOdds.toStringAsFixed(2) : '—',
+              color: AppColors.purple,
             ),
           ],
+        ),
+        const SizedBox(height: 16),
+        _SuccessBar(
+          label: 'Overall success rate',
+          successRate: analytics.successRate,
+          wins: analytics.wins,
+          losses: analytics.losses,
         ),
         const SizedBox(height: 16),
         const Text('By Signal Type', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
         const SizedBox(height: 8),
         if (surprise != null) _TypeRow(label: 'Surprise', stats: surprise),
         if (comeback != null) _TypeRow(label: 'Comeback', stats: comeback),
+      ],
+    );
+  }
+}
+
+class _SuccessBar extends StatelessWidget {
+  const _SuccessBar({
+    required this.label,
+    required this.successRate,
+    required this.wins,
+    required this.losses,
+  });
+
+  final int? successRate;
+  final int wins;
+  final int losses;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final resolved = wins + losses;
+    final fraction = resolved > 0 ? wins / resolved : 0.0;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(label, style: const TextStyle(fontSize: 13, color: Colors.white70)),
+            Text(
+              successRate != null ? '$successRate%' : 'No results yet',
+              style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.purple),
+            ),
+          ],
+        ),
+        const SizedBox(height: 6),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(6),
+          child: LinearProgressIndicator(
+            value: fraction,
+            minHeight: 10,
+            backgroundColor: AppColors.loss.withValues(alpha: 0.3),
+            valueColor: const AlwaysStoppedAnimation(AppColors.win),
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text('$wins won · $losses lost', style: const TextStyle(fontSize: 11, color: Colors.white54)),
       ],
     );
   }
@@ -171,15 +251,19 @@ class _StatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          children: [
-            Text(label, style: TextStyle(fontSize: 11, color: Colors.white.withValues(alpha: 0.6))),
-            const SizedBox(height: 4),
-            Text(value, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: color)),
-          ],
+    return Expanded(
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            children: [
+              Text(label,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 11, color: Colors.white.withValues(alpha: 0.6))),
+              const SizedBox(height: 4),
+              Text(value, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: color)),
+            ],
+          ),
         ),
       ),
     );
@@ -194,14 +278,43 @@ class _TypeRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final resolved = stats.wins + stats.losses;
+    final fraction = resolved > 0 ? stats.wins / resolved : 0.0;
+    final pending = stats.total - resolved;
+
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
-      child: ListTile(
-        title: Text(label),
-        subtitle: Text('${stats.total} signals · ${stats.wins}W / ${stats.losses}L'),
-        trailing: Text(
-          stats.successRate != null ? '${stats.successRate}%' : '—',
-          style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.purple),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
+                Text(
+                  stats.successRate != null ? '${stats.successRate}%' : '—',
+                  style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.purple),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(6),
+              child: LinearProgressIndicator(
+                value: fraction,
+                minHeight: 8,
+                backgroundColor: AppColors.loss.withValues(alpha: 0.25),
+                valueColor: const AlwaysStoppedAnimation(AppColors.win),
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              '${stats.total} signals · ${stats.wins}W / ${stats.losses}L · $pending pending',
+              style: const TextStyle(fontSize: 12, color: Colors.white54),
+            ),
+          ],
         ),
       ),
     );
